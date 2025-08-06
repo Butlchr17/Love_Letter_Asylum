@@ -39,12 +39,7 @@ class Game:
             "letter_archive": False    # View letters
         }
         self.trinkets = ["Heart Shaped Locket", "Ring of Passion", "Cloak of Regrets"]  # Add more
-        self.trinket_cost = 50 
-
-    def draw(self):
-        self.screen.fill((0,0,0)) # Black background for dark theme
-
-        # Draw more UI elements:
+        self.trinket_cost = 50
 
 
 """
@@ -257,6 +252,8 @@ Event methods for Sanctuary Buildings and Actions.
                 for item, amt in rewards.items():
                     self.inventory[item] = self.inventory.get(item, 0) + amt
                 self.message "Therapy won! Gained rewards."
+                
+                # 30% chance to find a letter at the end of combat. This needs to be changed in order to allow for full game completion before the game ends.
                 if random.random() < 0.3:
                     self.handle_event("found_letter")
             return True
@@ -476,3 +473,65 @@ Battle Events
                     self.state = "sanctuary"
                     self.generate_reception_pool()
                     self.message = "Retreated to the Sanctuary."
+
+    # Update Gamestates
+    def update(self):
+
+        # Battle States
+        if self.state == "therapy":
+            if self.turn_queue:
+                current = self.turn_queue[0]
+                 
+                 # Handle Enemy Turns
+                 if isinstance(current, Enemy) and current.hp > 0:
+                    if self.party:
+                        target = random.choice([h for h in self.party if h.hp > 0])  # Enemies attack a random party member. Change this later with better targetting logic
+                        current.act(target)
+                        self.message = f"{current.name} attacks {target.name}."
+                    self.turn_queue.pop(0)
+
+            # Shuffle Turns
+            else:
+                self.turn_queue = [e for e in self.party + self.enemies if e.hp > 0]
+                random.shuffle(self.turn_queue)
+            self.check_combat_end()
+
+        # 10% chance to add insanity when in Wards
+        if self.state == "ward" and random.random() < 0.1:
+            for hero in self.party:
+                hero.add_insanity(5)
+        
+        # Check for Game End
+        if len(self.letters_collected) >= 10:
+            self.check_ending()
+
+"""
+Game end
+"""    
+
+    # On Game End
+    def check_ending(self):
+        
+        # If player has collected all of the letters
+        if len(self.letters_collected) >= 10:
+            self.message = "All letters have been collected! Your party escapes from madness."
+        
+        # If player quits before collecting all of the letters
+        else:
+            self.message = "Incomplete collection: Permanent commitment to Love Letter Asylum."
+        
+        # Reset to game start
+        self.state = "sanctuary"
+        self.party = []
+        self.inventory = ["sedatives": 10, "keys": 5, "gold": 0]
+        self.letters_collected = []
+        self.asylum = None
+        self.hero_upgrade_level = 0
+        self.generate_reception_pool()
+        self.dead_heros = []
+
+"""
+Draw game objects on screen
+"""    
+    def draw(self):
+        

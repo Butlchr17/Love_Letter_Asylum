@@ -531,7 +531,168 @@ Game end
         self.dead_heros = []
 
 """
-Draw game objects on screen
+Draw game objects on screen 
+
+THIS SECTION NEEDS CHANGING WHEN ART IS ADDED
 """    
     def draw(self):
+        # screen background is all black
+        self.screen.fill((0, 0, 0))
+
+        # Draw the sanctuary
+        if self.state == "sanctuary":
+            
+            # Drawing the selected building
+            if self.selected_building:
+                building_name = self.get_building_name(self.selected_building)
+                text = self.font.render(f"{building_name} - Close with same keypress", True, (255, 255, 255))
+                # Display the name of the building
+                self.screen.blit(text, (10, 10))
+                
+                # Reception
+                if self.selected_building == "reception":
+                    for i, hero in enumerate(self.shop_pool):
+                        hero_text = self.small_font.render(f"A/B/C: {hero.name}({hero.psyche}) - Cost: {Self.hero_cost} gold", True, (255, 255, 255))
+                        # Display recruitable inmates
+                        self.screen.blit(hero_text, (10, 50 + i * 30))
+                    refresh_text = self.small_font.render("R: Refresh (5 gold)", True, (255, 255, 255))
+                    # Display refresh cost
+                    self.screen.blit(refresh_text, (10, 50 + len(self.shop_pool) * 30))
+                
+                # Chapel
+                elif self.selected_building == "chapel":
+                    text = self.small_font.render("R: Relieve insanity (20 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                
+                # Pharmacy
+                elif self.selected_building == "pharmacy":
+                    text = self.small_font.render("R: Relive insanity with risk (15 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                
+                # Tool Shed
+                elif self.selected_building == "tool_shed":
+                    text = self.small_font.render("1-4: Upgrade inmate gear (50 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                    for i, hero in enumerate(self.party):
+                        hero_text = self.small_font.render(f"{i+1}: {hero.name}", True, (255, 255, 255))
+                        self.screen.blit(hero_text, (10, 80 + i * 30))
+                
+                # Schizophrenic Whisperer
+                elif self.selected_building == "schizophrenic_whisperer":
+                    text = self.small_font.render("1-4: Upgrade inmate skills (40 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                    for i, hero in enumerate(self.party):
+                        hero_text = self.small_font.render(f"{i+1}: {hero.name}", True, (255, 255, 255))
+                        self.screen.blit(hero_text, (10, 80 + i * 30))
+                
+                # Ghost Merchant
+                elif self.selected_building == "ghost_merchant":
+                    text = self.small_font.render("1-3: Buy trinket (50 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                    for i, trinket in enumerate(self.trinkets):
+                        trinket_text = self.small_font.render(f"{i+1}: {trinket}", True, (255, 255, 255))
+                        self.screen.blit(trinket_text, (10, 80 + i * 30))
+                
+                # Lobotomy Tent
+                elif self.selected_building == "lobotomy_tent":
+                    text = self.small_font.render("1-4: Cure affliction (30 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                    for i, hero in enumerate(self.party):
+                        hero_text = self.small_font.render(f"{i+1}: {hero.name}({hero.affliction or 'None'})", True, (255, 255, 255))
+                        self.screen.blit(hero_text, (10, 80 + i * 30))
+
+                # Wounded Attendent:
+                elif self.selected_building == "wounded_attendent":
+                    text = self.small_font.render("R: Teach the party coping mechanisms (+1 def to all members, 25 gold)", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                
+                # Memorial Garden:
+                elif self.selected_building == "memorial_garden":
+                    text = self.small_font.render("Memorial Garden: Beloved fallen inmates lie here.", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                    for i, hero in enumerate(self.dead_heros):
+                        hero_text = self.small_font.render(f"{hero.name}{hero.psyche}", True, (255, 255, 255))
+                        self.screen.blit(hero_text, (10, 80, + i * 30))
+                
+                # Love Letter Archive
+                elif self.selected_building == "letter_archive":
+                    text = self.small_font.render("Love Letter Archive", True, (255, 255, 255))
+                    self.screen.blit(text, (10, 50))
+                    for i, letter in enumerate(self.letters_collected):
+                        letter_text = self.small_font.render(letter_text, (10, 80 + i * 30))
+            
+            # Display building names and hotkeys
+            else:
+                text = small_font.render("Sanctuary - 1: Reception, 2: Chapel, 3: Pharmacy, 4: Tool Shed, 5: Schizophrenic Whisperer", True, (255, 255, 255))
+                self.screen.blit(text, (10, 10))
+                text2 = self.small_font.render("6: Ghost Merchant, 7: Lobotomy Tent, 8: Wounded Attendent, 9: Memorial Garden, 0: Love Letter Archive, E: Enter Asylum, U: Asylum upgrade (1 key)", True, (255, 255, 255))
+                self.screen.blit(text2, (10, 50))
+            
+            # Display party info
+            y_offset = 100 if self.selected_building else 100
+            for i, hero in enumerate(self.party):
+                hero_text = self.small_font.render(f"{hero.name}({hero.psyche}): HP {hero.hp}/{hero.max_hp}, Ins {hero.insanity},  Aff {hero.affliction or None}", True, (255, 255, 255))
+                self.screen.blit(hero_text, (10, y_offset + i * 30))
+            
+            # Display Party Inventory
+            Inv_text = self.small_font.render(f"Inventory: Sedatives {self.inventory['sedatives']}, Keys {self.inventory['keys']}, Gold {self.inventory['gold']}", True, (255, 255, 255))
+            self.screen.blit(Inv_text, (10, y_offset + len(self.party) * 30  + 20))
+
+            # Display number of letters collected
+            letters_text = self.small_font.render(f"Letters: {len(self.letters_collected)}/10", true, (255,255, 255))
+            self.screen.blit(letters_text, (10, y_offset + len(self.party) * 30 + 50))
+
+            # Display Sanctuary level
+            upgrade_text = self.small_font.render(f"Sanctuary_Level: {self.hero_upgrade_level}", True, (255, 255, 255))
+            self.screen.blit(upgrade_text, (10, y_offset + len(self.party) * 30 + 80))
         
+
+"""
+Draw Exploration Screens in Asylum's Wards
+"""
+
+        elif self.state == "Ward":
+
+            # Ward name/info
+            theme_text = self.font.render(f"{self.asylum.theme} - Level {self.asylum.level}", True, (255, 255, 255))
+            self.screen.blit(theme_text, (10, 10))
+            goal_text = self.small_font.render("Goal: Find the ward key to unlock the ward boss' chambers. Defeat them to proceed to the next floor.", True, (255, 255, 255))
+            self.screen.blit(goal_text, (10, 50))
+            
+            # Drawing the map
+            cell_size = 50
+            for y in range(len(self.asylum.map)):
+                for x in range(len(self.asulum.map[0])):
+                    color = (100, 100, 100) if self.asylum.map[y][x] == "empty" else (255, 0, 0) if self.asylum.map[y][x] == "boss_room" else (0, 255, 0) of self.asylum.map[y][x] == "key" else (200, 200, 200)
+                    pygame.draw.circle.rect(self.screen, color, (100 + x * cell_size, ,100 + y * cell_size, cell_size, cell_size))
+                # Draw the player on the map
+                pygame.draw.circle(self.screen, (0, 255, 0), (100 + self.asylum.player_pos[0] * cell_size + 25, 100 + self.asylum.player_pos[1] * cell_size + 25), 20)
+
+
+"""
+Draw the combat scenes (therapy sessions)
+"""
+
+        elif self.state == "therapy":
+            text = self.font.render("Therapy Session! - A to attack, H to heal, Space to select", True, (255, 255, 255))
+            self.screen.blit(text, (10, 10))
+
+            # Display inmates and selection
+            for i, hero in enumerate(self.party):
+                hero_color = (0, 255, 0) if i == self.selected_hero else (255, 255, 255)
+                hero_text = self.small_font.render(f"{hero.name}: HP {hero.hp}/{hero.max_hp}, Ins {hero.insanity}", True, hero_color)
+                self.screen.blit(hero_text, (10, 50 + i * 30))
+            
+            # Display enemies
+            for i, enemy in enumerate(self.enemies):
+                if enemy.hp > 0:
+                    enemy_text = self.small_font.render(f"{enemy.name}: HP {enemy.hp}", True, (255, 0, 0))
+                    self.screen.blit(enemy_text, (400, 50 + i * 30))
+
+ """
+ UI Event Message Display
+ """      
+
+        # Display UI messages
+        msg_text = self.small_font.render(self.message, True, (255, 255, 0))
+        self.screen.blit(msg_text, (10, 550))

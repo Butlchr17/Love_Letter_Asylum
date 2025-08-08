@@ -1,4 +1,6 @@
 class Hero:
+    
+    # Hero base stats. Currently these are fixed. Needs updating with level-based scaling and unique classes
     def __init__(self, name, psyche):
         self.name = name
         self.psyche = psyche # "Delusion", "Hysteria", etc...
@@ -16,6 +18,8 @@ class Hero:
         self.add_insanity(damage * 2)
         return damage > 0
     
+
+    # Insanity and Afflictions, needs updating with periodic checks and worsening effects at 100 insanity
     def add_insanity(self, amount):
         self.insanity = max(0, min (100, self.insanity + amount))
         if self.insanity >= 100 and not self.affliction:

@@ -11,13 +11,30 @@ class Hero:
         self.affliction = None
 
     def take_damage(self, amount):
-        self.hp -= max(0, amount - self.defense)
-        if self.hp <= 0:
-            return True # DEAD
-        return False
+        damage = max(0, amount - self.defense)
+        self.hp -= damage
+        self.add_insanity(damage * 2)
+        return damage > 0
     
     def add_insanity(self, amount):
-        self.insanity = min(100, self.insanity + amount)
+        self.insanity = max(0, min (100, self.insanity + amount))
         if self.insanity >= 100 and not self.affliction:
-            self.affliction = "Paranoia" # Randomize this later
-    
+            afflictions == ["Paranoia", "Mania", "Catatonia"]
+            self.affliction = random.choice(afflictions)
+            if self.affliction == "Mania":
+                self.attack += 2
+                self.defense -= 1
+            elif self.affliction == "Catatonia":
+                self.attack -= 2
+
+    def __dict__(self):
+        return {
+            "name": self.name,
+            "psych": self.psyche,
+            "hp": self.hp,
+            "max_hp": self.max_hp,
+            "insanity": self.insanity,
+            "attack": self.attack,
+            "defense": self.defense,
+            "affliction": self.affliction
+        }

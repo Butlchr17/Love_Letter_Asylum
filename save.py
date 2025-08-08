@@ -2,6 +2,8 @@
 Saves game states and all necessary stats/collectables/completion awards
 
 This needs updating as game is further created in order to save additional stuff
+
+Currently assumes all fields exist. Add defaults or try-except for missing keys to handle partial saves
 """
 
 import json

@@ -52,7 +52,7 @@ Methods for Sanctuary buildings and functions
             pysches = ["Delusion", "Hysteria", "Obsession", "Phobia"]
             psyche = random.choice(psyches)
             hero = Hero(f"Echo {random.randint(1, 100)}", psyche)
-            hero.attack += self.hero_upgrade_level
+            hero.attack += self.hero_upgrade_level          # Consider making this more modular
             hero.defense += self.hero_upgrade_level // 2
             self.reception_pool.append(hero)
 
@@ -80,7 +80,7 @@ Methods for Sanctuary buildings and functions
             "schizophrenic_whisperer": "Schizophrenic Whisperer",
             "ghost_merchant": "Ghost Merchant",
             "lobotomy_tent": "Lobotomy Tent",
-            "wounded_attendant": "Wounded Attendent",
+            "wounded_attendant": "Wounded Attendant",
             "memorial_garden": "Memorial Garden",
             "letter_archive": "Love Letter Archive"
         }
@@ -113,8 +113,8 @@ Methods for Sanctuary buildings and functions
             hero.attack += 1
             hero.defense += 1
             self.message = f"Tool Shed: Upgraded {hero.name}'s belongings for 50 gold."
-            else:
-                self.message = "Invalid inmate or not enough gold."
+        else:
+            self.message = "Invalid inmate or not enough gold."
             
     def schizophrenic_whisperer_upgrade(self, hero_index):
         if 0 <= hero_index < len(self.party) and self.inventory["gold"] >= 40:
@@ -127,17 +127,17 @@ Methods for Sanctuary buildings and functions
             self.message = "Invalid inmate or not enough gold."
     
     def buy_from_merchant(self, trinket_index):
-        if <= trinket_index < len(self.trinkets) and self.inventory["gold"] >= self.trinket_cost:
+        if 0 <= trinket_index < len(self.trinkets) and self.inventory["gold"] >= self.trinket_cost:
             self.inventory["gold"] -= self.trinket_cost
             trinket = self.trinkets[trinket_index]
             if self.party:
                 hero = self.party[0]
-                if trinket = "Heart Shaped Locket":
+                if trinket == "Heart Shaped Locket":
                     hero.max_hp += 10
                     hero.hp += 10
-                elif trinket = "Ring of Passion":
+                elif trinket == "Ring of Passion":
                     hero.attack += 3
-                elif trinket = "Cloak of Regrets":
+                elif trinket == "Cloak of Regrets":
                     hero.defense += 2
                 self.message = f"Ghost Merchant: Bought {trinket} for {self.trinket_cost} gold. In the pockets of {hero.name}."
             else:
@@ -152,12 +152,12 @@ Methods for Sanctuary buildings and functions
         else:
             self.message = "Invalid inmate or not enough gold."
 
-    def attendent_buff(self):
+    def attendant_buff(self):
         if self.inventory["gold"] >= 25:
             self.inventory["gold"] -= 25
             for hero in self.party:
                 hero.defense += 1
-            self.message = "Wounded Attendent: Taught your party better coping mechanisms, +1 defense to inmates for 25 gold."
+            self.message = "Wounded Attendant: Taught your party better coping mechanisms, +1 defense to inmates for 25 gold."
         else:
             self.message = "Not enough gold."
 
@@ -172,7 +172,9 @@ Methods for Sanctuary buildings and functions
 
 
 """
-Event methods for Sanctuary Buildings and Actions.
+Event methods for battles.
+
+Currently the queue goes through dead enemies ... CHANGE THIS with checks to skip dead enemies/heros
 """
     
     def handle_event(self, event_type):
@@ -189,11 +191,12 @@ Event methods for Sanctuary Buildings and Actions.
             self.message = "Therapy session begins!"
 
         # Boss Battle
-        elif event_type = "start_boss":
+        elif event_type == "start_boss":
             boss_name = f"Boss of {self.asylum.theme}" # Add more creative names later
             self.enemies = [Enemy(boss_name, self.asylum.level * 2, is_boss=True)]
             self.state = "therapy"
-            self.is_boss_fight = Trueself.turn_queue = self.party + self.enemies
+            self.is_boss_fight = True
+            self.turn_queue = self.party + self.enemies
             random.shuffle(self.turn_queue)
             self.message = f"{boss_name} awakened!"
 
@@ -349,10 +352,10 @@ Event methods for Sanctuary Buildings and Actions.
                         index = keys.index(event.key)
                         self.lobotomy_treatment(index)
 
-                # Wounded Attendent
-                elif self.selected_building == "wounded_attendent":
+                # Wounded Attendant
+                elif self.selected_building == "wounded_attendant":
                     if event.key == pygame.K_r:
-                        self.attendent_buff()
+                        self.attendant_buff()
 
                 # Memorial Garden
                 elif self.selected_building == "memorial_garden":
@@ -601,8 +604,8 @@ THIS SECTION NEEDS CHANGING WHEN ART IS ADDED
                         hero_text = self.small_font.render(f"{i+1}: {hero.name}({hero.affliction or 'None'})", True, (255, 255, 255))
                         self.screen.blit(hero_text, (10, 80 + i * 30))
 
-                # Wounded Attendent:
-                elif self.selected_building == "wounded_attendent":
+                # Wounded Attendant:
+                elif self.selected_building == "wounded_attendant":
                     text = self.small_font.render("R: Teach the party coping mechanisms (+1 def to all members, 25 gold)", True, (255, 255, 255))
                     self.screen.blit(text, (10, 50))
                 
@@ -612,20 +615,21 @@ THIS SECTION NEEDS CHANGING WHEN ART IS ADDED
                     self.screen.blit(text, (10, 50))
                     for i, hero in enumerate(self.dead_heros):
                         hero_text = self.small_font.render(f"{hero.name}{hero.psyche}", True, (255, 255, 255))
-                        self.screen.blit(hero_text, (10, 80, + i * 30))
+                        self.screen.blit(hero_text, (10, 80 + i * 30))
                 
                 # Love Letter Archive
                 elif self.selected_building == "letter_archive":
                     text = self.small_font.render("Love Letter Archive", True, (255, 255, 255))
                     self.screen.blit(text, (10, 50))
                     for i, letter in enumerate(self.letters_collected):
-                        letter_text = self.small_font.render(letter_text, (10, 80 + i * 30))
+                        letter_text = self.small_font.render(letter, True, (255, 255, 255))  # This needs to be changed with the addition of specific love letters
+                        self.screen.blit(letter_text, (10, 80 + i * 30))
             
             # Display building names and hotkeys
             else:
-                text = small_font.render("Sanctuary - 1: Reception, 2: Chapel, 3: Pharmacy, 4: Tool Shed, 5: Schizophrenic Whisperer", True, (255, 255, 255))
+                text = self.small_font.render("Sanctuary - 1: Reception, 2: Chapel, 3: Pharmacy, 4: Tool Shed, 5: Schizophrenic Whisperer", True, (255, 255, 255))
                 self.screen.blit(text, (10, 10))
-                text2 = self.small_font.render("6: Ghost Merchant, 7: Lobotomy Tent, 8: Wounded Attendent, 9: Memorial Garden, 0: Love Letter Archive, E: Enter Asylum, U: Asylum upgrade (1 key)", True, (255, 255, 255))
+                text2 = self.small_font.render("6: Ghost Merchant, 7: Lobotomy Tent, 8: Wounded Attendant, 9: Memorial Garden, 0: Love Letter Archive, E: Enter Asylum, U: Asylum upgrade (1 key)", True, (255, 255, 255))
                 self.screen.blit(text2, (10, 50))
             
             # Display party info
@@ -639,7 +643,7 @@ THIS SECTION NEEDS CHANGING WHEN ART IS ADDED
             self.screen.blit(Inv_text, (10, y_offset + len(self.party) * 30  + 20))
 
             # Display number of letters collected
-            letters_text = self.small_font.render(f"Letters: {len(self.letters_collected)}/10", true, (255,255, 255))
+            letters_text = self.small_font.render(f"Letters: {len(self.letters_collected)}/10", True, (255,255, 255))
             self.screen.blit(letters_text, (10, y_offset + len(self.party) * 30 + 50))
 
             # Display Sanctuary level
@@ -662,9 +666,9 @@ Draw Exploration Screens in Asylum's Wards
             # Drawing the map
             cell_size = 50
             for y in range(len(self.asylum.map)):
-                for x in range(len(self.asulum.map[0])):
-                    color = (100, 100, 100) if self.asylum.map[y][x] == "empty" else (255, 0, 0) if self.asylum.map[y][x] == "boss_room" else (0, 255, 0) of self.asylum.map[y][x] == "key" else (200, 200, 200)
-                    pygame.draw.circle.rect(self.screen, color, (100 + x * cell_size, ,100 + y * cell_size, cell_size, cell_size))
+                for x in range(len(self.asylum.map[0])):
+                    color = (100, 100, 100) if self.asylum.map[y][x] == "empty" else (255, 0, 0) if self.asylum.map[y][x] == "boss_room" else (0, 255, 0) if self.asylum.map[y][x] == "key" else (200, 200, 200)
+                    pygame.draw.rect(self.screen, color, (100 + x * cell_size, ,100 + y * cell_size, cell_size, cell_size))
                 # Draw the player on the map
                 pygame.draw.circle(self.screen, (0, 255, 0), (100 + self.asylum.player_pos[0] * cell_size + 25, 100 + self.asylum.player_pos[1] * cell_size + 25), 20)
 

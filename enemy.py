@@ -20,4 +20,4 @@ class Enemy:
         damage = target.take_damage(self.attack)
         if random.random() < 0.3:
             target.add_insanity(10)
-        return damage
+        return damage   # Add a message or log for further debugging

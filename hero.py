@@ -19,7 +19,7 @@ class Hero:
     def add_insanity(self, amount):
         self.insanity = max(0, min (100, self.insanity + amount))
         if self.insanity >= 100 and not self.affliction:
-            afflictions == ["Paranoia", "Mania", "Catatonia"]
+            afflictions = ["Paranoia", "Mania", "Catatonia"]
             self.affliction = random.choice(afflictions)
             if self.affliction == "Mania":
                 self.attack += 2
@@ -30,7 +30,7 @@ class Hero:
     def __dict__(self):
         return {
             "name": self.name,
-            "psych": self.psyche,
+            "psyche": self.psyche,
             "hp": self.hp,
             "max_hp": self.max_hp,
             "insanity": self.insanity,
